@@ -3,8 +3,8 @@
 ## To Start the application
 
 ```sh
+$ yarn install
 $ yarn start
-$ expo start
 ```
 
 ## Link to the classes
