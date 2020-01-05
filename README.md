@@ -1,4 +1,4 @@
-# 🎬 MoviesAndMe : Application in React-Native to follow the OpenClassRoom classes
+# 🎬 MoviesAndMe : Application in React-Native to follow the OpenClassrooms classes
 
 ## To Start the application
 
