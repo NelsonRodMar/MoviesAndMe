@@ -12,6 +12,9 @@ class  Search extends React.Component {
   constructor(props) {
     super(props);
     this.searchedText = ""
+    this.page = 0
+    this.totalPages = 0
+    this.noResult = false
     this.state = {
       films: [],
       isLoading: false,
@@ -20,15 +23,37 @@ class  Search extends React.Component {
   }
   _loadFilms() {
     if(this.searchedText.length > 0 ){
-      getFilmsFromApiWithSearchedText(this.searchedText).then(data => {
+      this.setState({isLoading: true});
+      getFilmsFromApiWithSearchedText(this.searchedText, this.page + 1).then(data => {
         Keyboard.dismiss();
-        this.setState({isLoading: true});
-        this.setState({
-          films: data.results,
-          isLoading: false,
-        });
+        this.page = data.page
+        this.totalPages = data.total_pages
+        if(data.results.length > 0){
+          this.noResult = false
+          this.setState({
+            films: [...this.state.films, ...data.results], //Add new films to old list of film (concatenation)
+            isLoading: false,
+          });
+        } else {
+          this.noResult = true
+          this.setState({
+            films: [...this.state.films, ...data.results], //Add new films to old list of film (concatenation)
+            isLoading: false,
+          });
+        }
       })
     }
+  }
+
+  _searchFilms() {
+    this.page = 0
+    this.totalPages = 0
+    this.noResult = false
+    this.setState({
+      films: []
+    }, () => {
+      this._loadFilms()
+    })
   }
 
   _displayLoading() {
@@ -42,7 +67,7 @@ class  Search extends React.Component {
   }
 
   _noResults() {
-      if (this.state.films.length <= 0) {
+      if (this.noResult) {
         return (
           <View style={styles.loading_container}>
             <Text>No results</Text>
@@ -56,19 +81,24 @@ class  Search extends React.Component {
   }
 
   render() {
-    console.log(this.state.films.length);
     return(
       <View style={styles.main_container}>
         <TextInput
           placeholder="Titre du film"
           onChangeText={(text) => this._searchTextInputChanged(text)}
           style={styles.textinput}
-          onSubmitEditing={() => this._loadFilms()}
+          onSubmitEditing={() => this._searchFilms()}
          />
-        <Button title="Rechercher" onPress={() => {this._loadFilms()}} style={styles.button}/>
+        <Button title="Rechercher" onPress={() => {this._searchFilms()}} style={styles.button}/>
         <FlatList
           data={this.state.films}
           keyExtractor={(item) => item.id.toString()}
+          onEndReachedThreshold={0.25}
+          onEndReached={() => {
+            if(this.page < this.totalPages ){
+              this._loadFilms()
+            }
+          }}
           renderItem={({item}) => <FilmItem style={styles.filmItem} film={item}/>}
         />
         {this._displayLoading()}
