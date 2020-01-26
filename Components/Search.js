@@ -104,7 +104,7 @@ class  Search extends React.Component {
           }}
           extraData={this.props.favoritesFilm}
           renderItem={({item}) => <FilmItem style={styles.filmItem} film={item} 
-          isFavorite={this.props.favoritesFilm}
+          isFavorite={(this.props.favoritesFilm.findIndex(film => film.id === item.id) !== -1) ? true : false}
           displayDetailForFilm={this._displayDetailForFilm}/>}
         />
         {this._displayLoading()}
