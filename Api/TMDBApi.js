@@ -1,4 +1,4 @@
-import API_TOKEN from '../Helpers/EnvVariable';
+import API_TOKEN from '../Helpers/envVariable';
 
 export function getFilmsFromApiWithSearchedText (text, page) {
   const url = 'https://api.themoviedb.org/3/search/movie?api_key=' + API_TOKEN +

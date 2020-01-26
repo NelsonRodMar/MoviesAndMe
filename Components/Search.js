@@ -2,7 +2,7 @@ import React from 'react'
 
 import { StyleSheet, View, Button, TextInput, FlatList, Text,
   Keyboard, ActivityIndicator} from 'react-native'
-
+  import { connect } from 'react-redux'
 import films from '../Helpers/filmsData'
 import FilmItem from './FilmItem'
 import { getFilmsFromApiWithSearchedText } from '../Api/TMDBApi'
@@ -82,7 +82,7 @@ class  Search extends React.Component {
   _searchTextInputChanged(text) {
     this.searchedText = text
   }
-
+  
   render() {
     return(
       <View style={styles.main_container}>
@@ -102,7 +102,9 @@ class  Search extends React.Component {
               this._loadFilms()
             }
           }}
+          extraData={this.props.favoritesFilm}
           renderItem={({item}) => <FilmItem style={styles.filmItem} film={item} 
+          isFavorite={this.props.favoritesFilm}
           displayDetailForFilm={this._displayDetailForFilm}/>}
         />
         {this._displayLoading()}
@@ -141,4 +143,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   }
 });
-export default Search
+
+const mapStateToProps = (state) => {
+  return {
+    favoritesFilm : state.favoritesFilm
+  }
+} 
+
+export default connect(mapStateToProps)(Search) 
