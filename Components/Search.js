@@ -1,10 +1,10 @@
 import React from 'react'
 
-import { StyleSheet, View, Button, TextInput, FlatList, Text,
+import { StyleSheet, View, Button, TextInput,Text,
   Keyboard, ActivityIndicator} from 'react-native'
   import { connect } from 'react-redux'
 import films from '../Helpers/filmsData'
-import FilmItem from './FilmItem'
+import FilmList from './FilmList'
 import { getFilmsFromApiWithSearchedText } from '../Api/TMDBApi'
 
 class  Search extends React.Component {
@@ -20,32 +20,7 @@ class  Search extends React.Component {
       isLoading: false,
 
     };
-  }
-  _displayDetailForFilm = (idFilm) => {
-    this.props.navigation.navigate("FilmDetail", {idFilm : idFilm})
-  }
-  _loadFilms() {
-    if(this.searchedText.length > 0 ){
-      this.setState({isLoading: true});
-      getFilmsFromApiWithSearchedText(this.searchedText, this.page + 1).then(data => {
-        Keyboard.dismiss();
-        this.page = data.page
-        this.totalPages = data.total_pages
-        if(data.results.length > 0){
-          this.noResult = false
-          this.setState({
-            films: [...this.state.films, ...data.results], //Add new films to old list of film (concatenation)
-            isLoading: false,
-          });
-        } else {
-          this.noResult = true
-          this.setState({
-            films: [...this.state.films, ...data.results], //Add new films to old list of film (concatenation)
-            isLoading: false,
-          });
-        }
-      })
-    }
+    this._loadFilms = this._loadFilms.bind(this)
   }
 
   _searchFilms() {
@@ -83,6 +58,30 @@ class  Search extends React.Component {
     this.searchedText = text
   }
   
+  _loadFilms() {
+    if(this.searchedText.length > 0 ){
+      this.setState({isLoading: true});
+      getFilmsFromApiWithSearchedText(this.searchedText, this.page + 1).then(data => {
+        Keyboard.dismiss();
+        this.page = data.page
+        this.totalPages = data.total_pages
+        if(data.results.length > 0){
+          this.noResult = false
+          this.setState({
+            films: [...this.state.films, ...data.results], //Add new films to old list of film (concatenation)
+            isLoading: false,
+          });
+        } else {
+          this.noResult = true
+          this.setState({
+            films: [...this.state.films, ...data.results], //Add new films to old list of film (concatenation)
+            isLoading: false,
+          });
+        }
+      })
+    }
+  }
+
   render() {
     return(
       <View style={styles.main_container}>
@@ -93,19 +92,13 @@ class  Search extends React.Component {
           onSubmitEditing={() => this._searchFilms()}
          />
         <Button title="Rechercher" onPress={() => {this._searchFilms()}} style={styles.button}/>
-        <FlatList
-          data={this.state.films}
-          keyExtractor={(item) => item.id.toString()}
-          onEndReachedThreshold={0.25}
-          onEndReached={() => {
-            if(this.page < this.totalPages ){
-              this._loadFilms()
-            }
-          }}
-          extraData={this.props.favoritesFilm}
-          renderItem={({item}) => <FilmItem style={styles.filmItem} film={item} 
-          isFavorite={(this.props.favoritesFilm.findIndex(film => film.id === item.id) !== -1) ? true : false}
-          displayDetailForFilm={this._displayDetailForFilm}/>}
+        <FilmList 
+        films={this.state.films} 
+        navigation={this.props.navigation} 
+        loadFilms={this._loadFilms}
+        page={this.page}
+        totalPages={this.totalPages}
+        favoriteList={false}
         />
         {this._displayLoading()}
         {this._noResults()}
@@ -130,9 +123,6 @@ const styles = StyleSheet.create({
     button: {
       height: 50,
     },
-  filmItem: {
-    flex: 1
-  },
   loading_container: {
     position: 'absolute',
     left: 0,

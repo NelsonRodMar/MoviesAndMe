@@ -12,7 +12,7 @@ class FilmDetail extends React.Component {
         super(props);
         this.state = {
             film: undefined,
-            isLoading: true,
+            isLoading: false,
         };
       }
 
@@ -77,12 +77,23 @@ class FilmDetail extends React.Component {
     }
 
     componentDidMount() {
-        getFilmDetailFromApi(this.props.navigation.state.params.idFilm).then(data => {
+        const favoriteFilmIndex = this.props.favoritesFilm.findIndex(item => item.id ===
+          this.props.navigation.state.params.idFilm)
+        if (favoriteFilmIndex !== -1){
+          //Film déjà en favoris pas besoins d'appeler l'API pour les données
+          this.setState({
+            film: this.props.favoritesFilm[favoriteFilmIndex]
+          })
+          return
+        } else {
+          this.setState({ isLoading: true })
+          getFilmDetailFromApi(this.props.navigation.state.params.idFilm).then(data => {
             this.setState({
                 film: data,
                 isLoading: false
             })
         })
+        }
     }
 
     render () {
